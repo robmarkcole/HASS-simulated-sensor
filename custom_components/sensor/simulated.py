@@ -11,7 +11,7 @@ import datetime as dt
 from homeassistant.helpers.entity import Entity
 
 _LOGGER = logging.getLogger(__name__)
-SCAN_INTERVAL = dt.timedelta(seconds=1)
+SCAN_INTERVAL = dt.timedelta(seconds=0.1)
 ICON = 'mdi:chart-line'
 
 
@@ -19,25 +19,41 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the simulated sensor."""
     name = 'simulated_sine'
     unit_of_measurement = '%'
-    period_s = 60
     seed = 100
-    add_devices([SimulatedSensor(name, unit_of_measurement, period_s, seed)], True)
+    amplitude = 1
+    period = dt.timedelta(seconds=30)
+    sigma = 0.1
+    add_devices([SimulatedSensor(name, amplitude, period, sigma, unit_of_measurement, seed)], True)
 
 
 class SimulatedSensor(Entity):
     """Class for simulated sensor."""
 
-    def __init__(self, name, unit_of_measurement, period_s, seed):
-        """Initialize the sensor."""
+    def __init__(self, name, amplitude, period, sigma, unit_of_measurement, seed):
         self._name = name
         self._unit_of_measurement = unit_of_measurement
         self._seed = seed
-        self._state = None
         self._start_time = dt.datetime.now()
-        self._mean = None # The mean level
-        self._amplitude = 1.0 # The wave amplitude
-        self._period_s = dt.timedelta(seconds=period_s)  # The time period in seconds
-        self._noise = None # % (percent) of the amplitude
+        self._amplitude = amplitude
+        self._period = period.total_seconds()*1e6   # timedelta
+        self._sigma = sigma
+        self._state = None
+
+    def time_delta(self):
+        dt1 = self._start_time
+        dt2 = dt.datetime.now()
+        delta_milliseconds = (dt2 - dt1).total_seconds()*1e6
+        return delta_milliseconds
+
+    def sine_calc(self):
+        a = self._amplitude
+        delta_t = self.time_delta()
+        w = self._period
+        s = self._sigma
+        return (a * np.sin(2*np.pi*(delta_t)/w)) + np.random.normal(0, s)
+
+    def update(self):
+        self._state = self.sine_calc()
 
     @property
     def name(self):
@@ -53,20 +69,6 @@ class SimulatedSensor(Entity):
     def icon(self):
         """Icon to use in the frontend, if any."""
         return ICON
-
-    def update(self):
-        """Update the sensor."""
-        elapsed_time_s = (dt.datetime.now() - self._start_time).seconds
-
-        elapsed_periods = int(self.safe_division(elapsed_time_s, self._period_s.seconds))
-        phase = self.safe_division(
-                self._period_s.seconds, elapsed_time_s - (elapsed_periods*self._period_s.seconds))
-        self._state = self._amplitude*np.sin(phase*2*np.pi) #np.random.random()
-
-    def safe_division(self, x, y):
-        if y == 0:
-            return 0
-        return x / y
 
     @property
     def unit_of_measurement(self):
