@@ -12,3 +12,7 @@ history_graph:
     entities:
       - sensor.simulated_sine
 ```
+
+<p align="center">
+<img src="https://github.com/robmarkcole/HASS-simulated-sensor/blob/master/images/HA_view.png" width="500">
+</p>
