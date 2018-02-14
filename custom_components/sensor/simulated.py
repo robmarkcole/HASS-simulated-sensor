@@ -8,11 +8,45 @@ import logging
 import numpy as np
 import datetime as datetime
 
+import voluptuous as vol
+
 from homeassistant.helpers.entity import Entity
+import homeassistant.helpers.config_validation as cv
+from homeassistant.const import CONF_NAME
+from homeassistant.components.sensor import PLATFORM_SCHEMA
 
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = datetime.timedelta(seconds=0.1)
 ICON = 'mdi:chart-line'
+
+CONF_UNIT = 'unit'
+CONF_AMP = 'amplitude'
+CONF_MEAN = 'mean'
+CONF_PERIOD = 'period'
+CONF_PHASE = 'phase'
+CONF_SIGMA = 'sigma'
+CONF_SEED = 'seed'
+
+DEFAULT_NAME = 'simulated_sensor'
+DEFAULT_UNIT = 'value'
+DEFAULT_AMP = 25
+DEFAULT_MEAN = 50
+DEFAULT_PERIOD = datetime.timedelta(seconds=60)
+DEFAULT_PHASE = 0
+DEFAULT_SIGMA = 0.001
+DEFAULT_SEED = 100
+
+
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
+    vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
+    vol.Optional(CONF_UNIT, default=DEFAULT_UNIT): cv.string,
+    vol.Optional(CONF_AMP, default=DEFAULT_AMP): vol.Coerce(float),
+    vol.Optional(CONF_MEAN, default=DEFAULT_MEAN): vol.Coerce(float),
+    vol.Optional(CONF_PERIOD, default=DEFAULT_PERIOD): cv.time_period_seconds,
+    vol.Optional(CONF_PHASE, default=DEFAULT_PHASE): vol.Coerce(float),
+    vol.Optional(CONF_SIGMA, default=DEFAULT_SIGMA): vol.Coerce(float),
+    vol.Optional(CONF_SEED, default=DEFAULT_SEED): vol.Coerce(float),
+})
 
 
 def strfdelta(tdelta):
@@ -27,14 +61,15 @@ def strfdelta(tdelta):
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the simulated sensor."""
-    name = 'simulated_sine'
-    unit = '%'
-    amp = 10
-    mean = 50
-    period = datetime.timedelta(seconds=30)
-    phase = 90
-    sigma = 0.95
-    seed = 100
+    name = config.get(CONF_NAME)
+    unit = config.get(CONF_UNIT)
+    amp = config.get(CONF_AMP)
+    mean = config.get(CONF_MEAN)
+    period = config.get(CONF_PERIOD)
+    phase = config.get(CONF_PHASE)
+    sigma = config.get(CONF_SIGMA)
+    seed = config.get(CONF_SEED)
+    np.random.seed(seed)
     sensor = SimulatedSensor(
         name, unit, amp, mean, period, phase, sigma, seed
         )

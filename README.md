@@ -4,6 +4,9 @@ A simulated sensor for home-assistant. Image shows aliasing due to sampling inte
 ```yaml
 sensor:
   - platform: simulated
+    name: simulated_sine
+    amplitude: 100
+    period: 45
 
 history_graph:
   simulated_sine_graph:
