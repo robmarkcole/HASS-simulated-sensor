@@ -6,51 +6,74 @@ https://home-assistant.io/components/sensor.simulated/
 """
 import logging
 import numpy as np
-import datetime as dt
+import datetime as datetime
 
 from homeassistant.helpers.entity import Entity
 
 _LOGGER = logging.getLogger(__name__)
-SCAN_INTERVAL = dt.timedelta(seconds=0.1)
+SCAN_INTERVAL = datetime.timedelta(seconds=0.1)
 ICON = 'mdi:chart-line'
+
+
+def strfdelta(tdelta):
+    """Helper to print timedelta."""
+    d = {"days": tdelta.days}
+    d["hours"], rem = divmod(tdelta.seconds, 3600)
+    d["minutes"], d["seconds"] = divmod(rem, 60)
+    output_str = """{days} days, {hours} hours,
+    {minutes} minutes, {seconds} seconds""".format(**d)
+    return output_str
 
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
     """Set up the simulated sensor."""
     name = 'simulated_sine'
-    unit_of_measurement = '%'
+    unit = '%'
+    amp = 10
+    mean = 50
+    period = datetime.timedelta(seconds=30)
+    phase = 90
+    sigma = 0.95
     seed = 100
-    amplitude = 1
-    period = dt.timedelta(seconds=30)
-    sigma = 0.1
-    add_devices([SimulatedSensor(name, amplitude, period, sigma, unit_of_measurement, seed)], True)
+    sensor = SimulatedSensor(
+        name, unit, amp, mean, period, phase, sigma, seed
+        )
+    add_devices([sensor], True)
 
 
 class SimulatedSensor(Entity):
     """Class for simulated sensor."""
 
-    def __init__(self, name, amplitude, period, sigma, unit_of_measurement, seed):
+    def __init__(self, name, unit, amp, mean, period, phase, sigma, seed):
+        """Init the class."""
         self._name = name
-        self._unit_of_measurement = unit_of_measurement
-        self._seed = seed
-        self._start_time = dt.datetime.now()
-        self._amplitude = amplitude
-        self._period = period.total_seconds()*1e6   # timedelta
+        self._unit = unit
+        self._amp = amp
+        self._mean = mean
+        self._period = period
+        self._phase = phase  # phase in degrees
         self._sigma = sigma
+        self._seed = seed
+        self._start_time = datetime.datetime.now()
         self._state = None
 
     def time_delta(self):
-        dt1 = self._start_time
-        dt2 = dt.datetime.now()
-        delta_milliseconds = (dt2 - dt1).total_seconds()*1e6
-        return delta_milliseconds
+        """"Return the time difference between the current measurement
+        and the start of the session."""
+        dt0 = self._start_time
+        dt1 = datetime.datetime.now()
+        return dt1 - dt0
 
     def sine_calc(self):
-        a = self._amplitude
-        delta_t = self.time_delta()
-        w = self._period
-        s = self._sigma
-        return (a * np.sin(2*np.pi*(delta_t)/w)) + np.random.normal(0, s)
+        m0 = self._mean
+        a0 = self._amp
+        dt = self.time_delta().total_seconds()*1e6  # convert to  milliseconds
+        w0 = self._period.total_seconds()*1e6
+        s0 = self._sigma
+        p0 = self._phase*np.pi/180  # Convert to radians
+        periodic = (a0 * np.sin(2*np.pi*(dt)/w0) + p0)
+        noise = np.random.normal(0, s0)
+        return m0 + periodic + noise
 
     def update(self):
         self._state = self.sine_calc()
@@ -73,13 +96,17 @@ class SimulatedSensor(Entity):
     @property
     def unit_of_measurement(self):
         """Return the unit this state is expressed in."""
-        return self._unit_of_measurement
+        return self._unit
 
     @property
     def device_state_attributes(self):
         """Return other details about the sensor state."""
         attr = {
+            'amplitude': self._amp,
+            'mean': self._mean,
+            'period': strfdelta(self._period),
+            'phase': self._phase,
+            'sigma': self._sigma,
             'seed': self._seed,
-            'start_time': self._start_time,
             }
         return attr
