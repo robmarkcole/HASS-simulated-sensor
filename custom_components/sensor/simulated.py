@@ -24,7 +24,7 @@ CONF_AMP = 'amplitude'
 CONF_MEAN = 'mean'
 CONF_PERIOD = 'period'
 CONF_PHASE = 'phase'
-CONF_SIGMA = 'sigma'
+CONF_FWHM = 'spread'
 CONF_SEED = 'seed'
 
 DEFAULT_NAME = 'simulated'
@@ -33,8 +33,8 @@ DEFAULT_AMP = 1
 DEFAULT_MEAN = 0
 DEFAULT_PERIOD = datetime.timedelta(seconds=60)
 DEFAULT_PHASE = 0
-DEFAULT_SIGMA = 0.0
-DEFAULT_SEED = 999
+DEFAULT_FWHM = 0.0
+DEFAULT_SEED = None
 
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
@@ -44,8 +44,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_MEAN, default=DEFAULT_MEAN): vol.Coerce(float),
     vol.Optional(CONF_PERIOD, default=DEFAULT_PERIOD): cv.time_period_seconds,
     vol.Optional(CONF_PHASE, default=DEFAULT_PHASE): vol.Coerce(float),
-    vol.Optional(CONF_SIGMA, default=DEFAULT_SIGMA): vol.Coerce(float),
-    vol.Optional(CONF_SEED, default=DEFAULT_SEED): vol.Coerce(float),
+    vol.Optional(CONF_FWHM, default=DEFAULT_FWHM): vol.Coerce(float),
+    vol.Optional(CONF_SEED, default=DEFAULT_SEED): cv.positive_int,
 })
 
 
@@ -57,11 +57,14 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     mean = config.get(CONF_MEAN)
     period = config.get(CONF_PERIOD)
     phase = config.get(CONF_PHASE)
-    sigma = config.get(CONF_SIGMA)
+    fwhm = config.get(CONF_FWHM)
     seed = config.get(CONF_SEED)
-    np.random.seed(seed)
+
+    if seed:
+        np.random.seed(seed)  # If a seed is configured, apply.
+
     sensor = SimulatedSensor(
-        name, unit, amp, mean, period, phase, sigma, seed
+        name, unit, amp, mean, period, phase, fwhm, seed
         )
     add_devices([sensor], True)
 
@@ -69,7 +72,7 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
 class SimulatedSensor(Entity):
     """Class for simulated sensor."""
 
-    def __init__(self, name, unit, amp, mean, period, phase, sigma, seed):
+    def __init__(self, name, unit, amp, mean, period, phase, fwhm, seed):
         """Init the class."""
         self._name = name
         self._unit = unit
@@ -77,7 +80,7 @@ class SimulatedSensor(Entity):
         self._mean = mean
         self._period = period
         self._phase = phase  # phase in degrees
-        self._sigma = sigma
+        self._fwhm = fwhm
         self._seed = seed
         self._start_time = datetime.datetime.now()
         self._state = None
@@ -94,7 +97,7 @@ class SimulatedSensor(Entity):
         a0 = self._amp
         dt = self.time_delta().total_seconds()*1e6  # convert to  milliseconds
         w0 = self._period.total_seconds()*1e6
-        s0 = self._sigma
+        s0 = self._fwhm/2
         p0 = self._phase*np.pi/180  # Convert to radians
         periodic = a0 * (np.sin((2*np.pi*dt/w0) + p0))
         noise = np.random.normal(0, s0)
@@ -131,7 +134,7 @@ class SimulatedSensor(Entity):
             'mean': self._mean,
             'period': str(int(self._period.total_seconds())) + " seconds",
             'phase': str(self._phase) + " degrees",
-            'sigma': self._sigma,
+            'spread': self._fwhm,
             'seed': self._seed,
             }
         return attr
