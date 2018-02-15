@@ -16,7 +16,7 @@ from homeassistant.const import CONF_NAME
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 
 _LOGGER = logging.getLogger(__name__)
-SCAN_INTERVAL = datetime.timedelta(seconds=0.1)
+SCAN_INTERVAL = datetime.timedelta(seconds=1)
 ICON = 'mdi:chart-line'
 
 CONF_UNIT = 'unit'
@@ -27,14 +27,14 @@ CONF_PHASE = 'phase'
 CONF_SIGMA = 'sigma'
 CONF_SEED = 'seed'
 
-DEFAULT_NAME = 'simulated_sensor'
+DEFAULT_NAME = 'simulated'
 DEFAULT_UNIT = 'value'
-DEFAULT_AMP = 25
-DEFAULT_MEAN = 50
+DEFAULT_AMP = 1
+DEFAULT_MEAN = 0
 DEFAULT_PERIOD = datetime.timedelta(seconds=60)
 DEFAULT_PHASE = 0
-DEFAULT_SIGMA = 0.001
-DEFAULT_SEED = 100
+DEFAULT_SIGMA = 0.0
+DEFAULT_SEED = 999
 
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
@@ -47,16 +47,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_SIGMA, default=DEFAULT_SIGMA): vol.Coerce(float),
     vol.Optional(CONF_SEED, default=DEFAULT_SEED): vol.Coerce(float),
 })
-
-
-def strfdelta(tdelta):
-    """Helper to print timedelta."""
-    d = {"days": tdelta.days}
-    d["hours"], rem = divmod(tdelta.seconds, 3600)
-    d["minutes"], d["seconds"] = divmod(rem, 60)
-    output_str = """{days} days, {hours} hours,
-    {minutes} minutes, {seconds} seconds""".format(**d)
-    return output_str
 
 
 def setup_platform(hass, config, add_devices, discovery_info=None):
@@ -99,19 +89,19 @@ class SimulatedSensor(Entity):
         dt1 = datetime.datetime.now()
         return dt1 - dt0
 
-    def sine_calc(self):
+    def signal_calc(self):
         m0 = self._mean
         a0 = self._amp
         dt = self.time_delta().total_seconds()*1e6  # convert to  milliseconds
         w0 = self._period.total_seconds()*1e6
         s0 = self._sigma
         p0 = self._phase*np.pi/180  # Convert to radians
-        periodic = (a0 * np.sin(2*np.pi*(dt)/w0) + p0)
+        periodic = a0 * (np.sin((2*np.pi*dt/w0) + p0))
         noise = np.random.normal(0, s0)
         return m0 + periodic + noise
 
     def update(self):
-        self._state = self.sine_calc()
+        self._state = self.signal_calc()
 
     @property
     def name(self):
@@ -139,8 +129,8 @@ class SimulatedSensor(Entity):
         attr = {
             'amplitude': self._amp,
             'mean': self._mean,
-            'period': strfdelta(self._period),
-            'phase': self._phase,
+            'period': str(int(self._period.total_seconds())) + " seconds",
+            'phase': str(self._phase) + " degrees",
             'sigma': self._sigma,
             'seed': self._seed,
             }
