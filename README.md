@@ -5,7 +5,7 @@ This is a home-assistant [custom component](https://home-assistant.io/developers
 This component provides a simulated sensor that generates a time-varying signal ```V(t)``` given by the [function](https://en.wikipedia.org/wiki/Sine_wave):
 
  ```
- V(t) = M + A sin(2 pi (t - t_0) / w) + N(s)
+ V(t) = M + A sin((2 pi (t - t_0) / w) + P) + N(s)
  ```
 
 where:
@@ -15,6 +15,7 @@ where:
 - **t** = the time when a value is generated
 - **t_0** = the time when the sensor is started
 - **w** = the time period for a single cycle of the sine wave, default value **60** seconds
+- **P** = the phase offset to add, default value **0** degrees
 - **N(s)** = the random [Gaussian noise](https://en.wikipedia.org/wiki/Gaussian_noise) with spread **s**, defaults value **0**
 
 
