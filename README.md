@@ -1,6 +1,6 @@
 # HASS-simulated-sensor
 
-This is a home-assistant custom component - place the custom_components folder in your configuration directory (or add its contents to an existing custom_components folder).
+This is a home-assistant [custom component](https://home-assistant.io/developers/platform_example_sensor/) - place the custom_components folder in your configuration directory (or add its contents to an existing custom_components folder).
 
 This component provides a simulated sensor that generates a time-varying signal ```V(t)``` given by the [function](https://en.wikipedia.org/wiki/Sine_wave):
 
@@ -15,10 +15,10 @@ where:
 - **t** = the time when a value is generated
 - **t_0** = the time when the sensor is started
 - **w** = the time period for a single cycle of the sine wave, default value **60** seconds
-- **N(s)** = the random Gaussian noise with spread **s**, defaults value **0**
+- **N(s)** = the random [Gaussian noise](https://en.wikipedia.org/wiki/Gaussian_noise) with spread **s**, defaults value **0**
 
 
-A simulated sensor with default values can be added to home-assistant and displayed using a with history_graph the following config:
+A simulated sensor with default values can be added to home-assistant and displayed using a  [history_graph](https://home-assistant.io/components/history_graph/) using the following config:
 
 ```yaml
 sensor:
@@ -36,7 +36,7 @@ history_graph:
 <img src="https://github.com/robmarkcole/HASS-simulated-sensor/blob/master/images/HA_view.png" width="500">
 </p>
 
-To give an example of simulating real world data, we can create a simulated relative humidity sensor using the config below:
+To give an example of simulating real world data, we can create a simulated relative humidity sensor (in %) using the config below:
 
 ```yaml
 - platform: simulated
