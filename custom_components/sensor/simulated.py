@@ -15,6 +15,8 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.const import CONF_NAME
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 
+REQUIREMENTS = ['numpy==1.14.0']
+
 _LOGGER = logging.getLogger(__name__)
 SCAN_INTERVAL = datetime.timedelta(seconds=1)
 ICON = 'mdi:chart-line'
