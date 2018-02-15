@@ -44,4 +44,8 @@ To give an example of simulating real world data, we can create a simulated rela
   spread: 10
   seed: 999
 ```
-A graph of the data generated is below. Bear in mind that due to statistics, approximately 30% of values are outside of the configured spread of 10.
+Here the sine wave contribution has been set to zero by configuring an amplitude of **0**, and a Gaussian noise signal with spread **10** is generated about a mean value of **50**. A graph of the data generated is below. Bear in mind that [due to statistics](https://en.wikipedia.org/wiki/Normal_distribution), approximately 30% of values are outside of the configured spread of **10**.
+
+<p align="center">
+<img src="https://github.com/robmarkcole/HASS-simulated-sensor/blob/master/images/simulated_humidity.png" width="500">
+</p>
