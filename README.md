@@ -1,5 +1,8 @@
 # HASS-simulated-sensor
-A simulated sensor that generates a time-varying value ```V(t)``` given by the [function](https://en.wikipedia.org/wiki/Sine_wave):
+
+This is a home-assistant custom component - place the custom_components folder in your configuration directory (or add its contents to an existing custom_components folder).
+
+This component provides a simulated sensor that generates a time-varying signal ```V(t)``` given by the [function](https://en.wikipedia.org/wiki/Sine_wave):
 
  ```
  V(t) = M + A sin(2 pi (t - t_0) / w) + N(s)
