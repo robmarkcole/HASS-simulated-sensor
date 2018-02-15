@@ -53,3 +53,13 @@ Here the sine wave contribution has been set to zero by configuring an amplitude
 <p align="center">
 <img src="https://github.com/robmarkcole/HASS-simulated-sensor/blob/master/images/simulated_humidity.png" width="500">
 </p>
+
+Configuration variables:
+- **name** string (*Optional*): The name of the sensor
+- **unit** string (*Optional*): The unit to apply
+- **amplitude** number (*Optional*): The [amplitude](https://en.wikipedia.org/wiki/Amplitude) of the periodic components
+- **mean** number (*Optional*): The [mean](https://en.wikipedia.org/wiki/Mean) level
+- **period** number (*Optional*): The number of seconds for the [period](https://en.wikipedia.org/wiki/Periodic_function)
+- **phase** number (*Optional*): The [phase](https://en.wikipedia.org/wiki/Phase_(waves)) offset (in degrees) to apply to the periodic component
+- **spread** number (*Optional*): The spread ([FWHM](https://en.wikipedia.org/wiki/Full_width_at_half_maximum)) of the Gaussian noise
+- **seed** number (*Optional*): The [seed](https://docs.scipy.org/doc/numpy/reference/generated/numpy.random.seed.html) value for the random component
