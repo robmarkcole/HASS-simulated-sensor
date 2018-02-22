@@ -39,13 +39,14 @@ sensor:
 To give an example of simulating real world data, a simulated relative humidity sensor (in %) can be added using the following config:
 
 ```yaml
-- platform: simulated
-  name: 'simulated relative humidity'
-  unit: '%'
-  amplitude: 0 # Turns off the periodic contribution
-  mean: 50
-  spread: 10
-  seed: 999
+sensor:
+  - platform: simulated
+    name: 'simulated relative humidity'
+    unit: '%'
+    amplitude: 0 # Turns off the periodic contribution
+    mean: 50
+    spread: 10
+    seed: 999
 ```
 
 Configuration variables:
@@ -82,6 +83,11 @@ phase:
   type: float
 seed:
   description: The [seed](https://docs.python.org/3.6/library/random.html#random.seed) value for the random noise component
+  required: false
+  default: None
+  type: int
+spread:
+  description: The spread is the range of the randomly distributed values about their mean. This is sometimes referred to as the Full Width at Half Maximum (FWHM) of the random distribution.
   required: false
   default: None
   type: int

@@ -34,7 +34,7 @@ DEFAULT_AMP = 1
 DEFAULT_MEAN = 0
 DEFAULT_PERIOD = datetime.timedelta(seconds=60)
 DEFAULT_PHASE = 0
-DEFAULT_FWHM = 0.0
+DEFAULT_FWHM = 0
 DEFAULT_SEED = None
 
 
@@ -87,24 +87,25 @@ class SimulatedSensor(Entity):
         self._state = None
 
     def time_delta(self):
-        """"Return the time difference between the current measurement
-        and the start of the session."""
+        """"Return the time delta."""
         dt0 = self._start_time
         dt1 = datetime.datetime.now()
         return dt1 - dt0
 
     def signal_calc(self):
-        m0 = self._mean
-        a0 = self._amp
-        dt = self.time_delta().total_seconds()*1e6  # convert to  milliseconds
-        w0 = self._period.total_seconds()*1e6
-        s0 = self._fwhm/2
-        p0 = math.radians(self._phase)
-        periodic = a0 * (math.sin((2*math.pi*dt/w0) + p0))
-        noise = random.gauss(mu=0, sigma=s0)
-        return m0 + periodic + noise
+        """Calculate the signal."""
+        mean = self._mean
+        amp = self._amp
+        time_delta = self.time_delta().total_seconds()*1e6  # to  milliseconds
+        period = self._period.total_seconds()*1e6
+        fwhm = self._fwhm/2
+        phase = math.radians(self._phase)
+        periodic = amp * (math.sin((2*math.pi*time_delta/period) + phase))
+        noise = random.gauss(mu=0, sigma=fwhm)
+        return mean + periodic + noise
 
     def update(self):
+        """Update the sensor."""
         self._state = self.signal_calc()
 
     @property
