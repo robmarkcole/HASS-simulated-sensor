@@ -46,7 +46,7 @@ To give an example of simulating real world data, we can create a simulated rela
   amplitude: 0 # Turns off sine wave
   mean: 50
   spread: 10
-  seed: 999
+  seed: 50
 ```
 Here the sine wave contribution has been set to zero by configuring an amplitude of **0**, and a Gaussian noise signal with spread **10** is generated about a mean value of **50**. A graph of the data generated is below. Bear in mind that [due to statistics](https://en.wikipedia.org/wiki/Normal_distribution), approximately 30% of values are outside of the configured spread of **10**.
 
@@ -62,4 +62,4 @@ Configuration variables:
 - **period** number (*Optional*): The number of seconds for the [period](https://en.wikipedia.org/wiki/Periodic_function)
 - **phase** number (*Optional*): The [phase](https://en.wikipedia.org/wiki/Phase_(waves)) offset (in degrees) to apply to the periodic component
 - **spread** number (*Optional*): The spread ([FWHM](https://en.wikipedia.org/wiki/Full_width_at_half_maximum)) of the Gaussian noise
-- **seed** number (*Optional*): The [seed](https://docs.scipy.org/doc/numpy/reference/generated/numpy.random.seed.html) value for the random component
+- **seed** number (*Optional*): The [seed](https://docs.python.org/3.6/library/random.html#random.seed) value for the random component
