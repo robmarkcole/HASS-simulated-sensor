@@ -1,16 +1,15 @@
 """
-Adds a simulated sensor.
+Demo platform that has a couple of fake sensors.
 
-For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/sensor.simulated/
+For more details about this platform, please refer to the documentation
+https://home-assistant.io/components/demo/
 """
 import datetime as datetime
 import math
-import random
+from random import Random
 import logging
 
 import voluptuous as vol
-
 from homeassistant.helpers.entity import Entity
 import homeassistant.helpers.config_validation as cv
 from homeassistant.const import CONF_NAME
@@ -28,15 +27,14 @@ CONF_PHASE = 'phase'
 CONF_FWHM = 'spread'
 CONF_SEED = 'seed'
 
-DEFAULT_NAME = 'simulated'
-DEFAULT_UNIT = 'value'
-DEFAULT_AMP = 1
-DEFAULT_MEAN = 0
-DEFAULT_PERIOD = 60
+DEFAULT_NAME = 'Outside Humidity'
+DEFAULT_UNIT = '%'
+DEFAULT_AMP = 0
+DEFAULT_MEAN = 54
+DEFAULT_PERIOD = 0
 DEFAULT_PHASE = 0
 DEFAULT_FWHM = 0
 DEFAULT_SEED = 999
-
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
@@ -50,8 +48,9 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 
+# pylint: disable=unused-argument
 def setup_platform(hass, config, add_devices, discovery_info=None):
-    """Set up the simulated sensor."""
+    """Set up the Demo sensors."""
     name = config.get(CONF_NAME)
     unit = config.get(CONF_UNIT)
     amp = config.get(CONF_AMP)
@@ -60,16 +59,14 @@ def setup_platform(hass, config, add_devices, discovery_info=None):
     phase = config.get(CONF_PHASE)
     fwhm = config.get(CONF_FWHM)
     seed = config.get(CONF_SEED)
-    random.seed(seed)
 
-    sensor = SimulatedSensor(
-        name, unit, amp, mean, period, phase, fwhm, seed
-        )
-    add_devices([sensor], True)
+    add_devices([
+        DemoSensor(name, unit, amp, mean, period, phase, fwhm, seed)
+    ])
 
 
-class SimulatedSensor(Entity):
-    """Class for simulated sensor."""
+class DemoSensor(Entity):
+    """Representation of a Demo sensor."""
 
     def __init__(self, name, unit, amp, mean, period, phase, fwhm, seed):
         """Init the class."""
@@ -81,6 +78,7 @@ class SimulatedSensor(Entity):
         self._phase = phase  # phase in degrees
         self._fwhm = fwhm
         self._seed = seed
+        self._random = Random(seed)  # A local seeded Random
         self._start_time = datetime.datetime.now()
         self._state = None
 
@@ -98,8 +96,11 @@ class SimulatedSensor(Entity):
         period = self._period*1e6  # to milliseconds
         fwhm = self._fwhm/2
         phase = math.radians(self._phase)
-        periodic = amp * (math.sin((2*math.pi*time_delta/period) + phase))
-        noise = random.gauss(mu=0, sigma=fwhm)
+        if period == 0:
+            periodic = 0
+        else:
+            periodic = amp * (math.sin((2*math.pi*time_delta/period) + phase))
+        noise = self._random.gauss(mu=0, sigma=fwhm)
         return mean + periodic + noise
 
     def update(self):
