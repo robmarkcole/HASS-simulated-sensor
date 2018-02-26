@@ -4,6 +4,7 @@ Adds a simulated sensor.
 For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/sensor.simulated/
 """
+import asyncio
 import datetime as datetime
 import math
 from random import Random
@@ -106,7 +107,8 @@ class SimulatedSensor(Entity):
         noise = self._random.gauss(mu=0, sigma=fwhm)
         return mean + periodic + noise
 
-    def update(self):
+    @asyncio.coroutine
+    def async_update(self):
         """Update the sensor."""
         self._state = self.signal_calc()
 
